@@ -1,0 +1,351 @@
+<title>Güneş Sistemi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Düzen: siyah zemin, solda büyük gezegen çizimi, sağda bilgi sütunu; çiftlerde yer değiştirir. Gerçek çap oranlarını gösteren bir şerit en üstte. */
+:root {
+  --bg: #000000;
+  --fg: #e8ebf2;
+  --muted: #8a93a6;
+  --line: #1c212c;
+  --panel: #07090d;
+  --accent: #9fb4ff;
+  --font-display: "Syne", "Trebuchet MS", sans-serif;
+  --font-body: "Hanken Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.65;
+  padding-block: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+#stars { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.wrap { position: relative; z-index: 1; max-width: 1120px; margin-inline: auto; }
+
+.powered { padding-block: 18px; border-bottom: 1px solid var(--line); font-family: var(--font-mono); font-size: 13px; letter-spacing: .08em; color: var(--muted); text-align: center; }
+.powered strong { color: var(--fg); font-weight: 500; }
+.powered a { color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--muted); }
+.powered a:hover, .powered a:focus-visible { color: var(--accent); border-bottom-color: var(--accent); outline: none; }
+header { padding-block: 44px 28px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(44px, 9vw, 104px); line-height: .98; letter-spacing: -.02em; margin: 0 0 22px; text-wrap: balance; }
+.lead { max-width: 60ch; color: #c3c9d6; margin: 0; }
+
+nav.planets { display: flex; flex-wrap: wrap; gap: 8px 8px; margin-top: 28px; }
+nav.planets a {
+  font-family: var(--font-mono); font-size: 13px; color: var(--fg); text-decoration: none;
+  padding: 7px 13px; border: 1px solid var(--line); border-radius: 999px; background: rgba(7,9,13,.7);
+}
+nav.planets a:hover, nav.planets a:focus-visible { border-color: var(--c, var(--accent)); color: var(--c, var(--accent)); outline: none; }
+
+/* Gerçek çap oranları */
+.scale { padding-block: 36px 24px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: 40px; }
+.scale h2 { font-family: var(--font-display); font-size: 20px; margin: 0 0 6px; }
+.scale p { margin: 0 0 26px; color: var(--muted); font-size: 14.5px; max-width: 70ch; }
+.strip { --j: min(190px, calc((100vw - 32px - 64px) / 3.4)); display: flex; align-items: center; justify-content: center; gap: 8px; padding-block: 20px; }
+.mini {
+  display: block; flex: none; width: calc(var(--j) * var(--r)); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle at 35% 32%, var(--c1), var(--c2) 58%, var(--c3));
+  position: relative; transition: transform .2s;
+}
+.mini:hover, .mini:focus-visible { transform: scale(1.08); outline: none; box-shadow: 0 0 0 2px var(--c2); }
+.mini.sat { margin-inline: calc(var(--j) * .3); }
+.mini.sat::after {
+  content: ""; position: absolute; left: -45%; right: -45%; top: 36%; height: 28%;
+  border: 2px solid rgba(223,200,150,.75); border-radius: 50%; transform: rotate(-14deg); pointer-events: none;
+}
+
+/* Gezegen bölümleri */
+section.planet {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px;
+  padding-block: 64px; border-bottom: 1px solid var(--line); scroll-margin-top: 8px;
+}
+.art { display: flex; align-items: center; justify-content: center; min-width: 0; }
+.art svg { width: 100%; max-width: 460px; height: auto; display: block; }
+.info { min-width: 0; }
+.idx { font-family: var(--font-mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--c); margin: 0 0 8px; }
+h2.name { font-family: var(--font-display); font-weight: 800; font-size: clamp(38px, 6vw, 68px); line-height: 1; letter-spacing: -.01em; margin: 0 0 8px; }
+.tag { font-size: 19px; color: #d6dbe6; margin: 0 0 18px; text-wrap: balance; }
+.info p.body { margin: 0 0 14px; color: #b7bfce; max-width: 62ch; }
+.fact { margin: 20px 0 24px; padding: 14px 16px; background: var(--panel); border-left: 2px solid var(--c); color: #d0d6e2; font-size: 15.5px; max-width: 62ch; }
+.fact b { font-family: var(--font-mono); font-weight: 500; font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--c); display: block; margin-bottom: 4px; }
+
+dl.data { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0; margin: 0; border-top: 1px solid var(--line); }
+dl.data div { padding: 12px 14px 12px 0; border-bottom: 1px solid var(--line); min-width: 0; }
+dl.data dt { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 3px; }
+dl.data dd { margin: 0; font-size: 16px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+dl.data dd small { color: var(--muted); font-size: 13px; }
+
+.dist { margin-top: 20px; }
+.dist .lab { display: flex; justify-content: space-between; gap: 12px; font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+.dist .track { height: 6px; background: #10141c; border-radius: 3px; position: relative; }
+.dist .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--c); border-radius: 3px; min-width: 4px; }
+
+@media (min-width: 860px) {
+  section.planet { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 56px; align-items: center; }
+  section.planet:nth-of-type(even) .art { order: 2; }
+}
+
+.to-top {
+  position: fixed; z-index: 20;
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(7,9,13,.9); color: var(--fg); border: 1px solid #2a3140; cursor: pointer;
+  transition: border-color .2s, color .2s, transform .2s;
+}
+.to-top:hover, .to-top:focus-visible { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); outline: none; }
+.to-top svg { width: 22px; height: 22px; display: block; }
+footer { padding-block: 40px 64px; color: var(--muted); font-size: 14px; max-width: 72ch; }
+footer p { margin: 0 0 8px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .mini { transition: none; } }
+</style>
+
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="wrap">
+  <div class="powered">Powered BY: <a href="https://ardatanayi.github.io/tanayi-yazilim/" target="_blank" rel="noopener noreferrer"><strong>Tanayi YAZILIM</strong></a></div>
+  <header>
+    <p class="eyebrow">Güneş'in etrafındaki sekiz gezegen</p>
+    <h1>Güneş Sistemi</h1>
+    <p class="lead">Güneş'ten başlayarak sırasıyla Merkür, Venüs, Dünya, Mars, Jüpiter, Satürn, Uranüs ve Neptün. Her gezegen için boyut, uzaklık, sıcaklık ve gün uzunluğu gibi temel değerleri aşağıda bulabilirsiniz.</p>
+    <nav class="planets" id="nav" aria-label="Gezegenler"></nav>
+  </header>
+
+  <div class="scale">
+    <h2>Gerçek boyut oranları</h2>
+    <p>Gezegenler Güneş'e yakınlık sırasıyla dizildi ve çapları birbirine oranla gerçek ölçekte çizildi. Güneş bu şeritte gösterilmiyor çünkü çapı Jüpiter'in yaklaşık 10 katı.</p>
+    <div class="strip" id="strip"></div>
+  </div>
+
+  <main id="main"></main>
+
+  <footer>
+    <p>Değerler yuvarlatılmıştır. Yörünge süreleri ve uzaklıklar ortalama değerlerdir; 1 AU (astronomik birim) Dünya ile Güneş arasındaki ortalama uzaklık olan yaklaşık 149,6 milyon km'dir.</p>
+    <p>Uydu sayıları yeni keşiflerle sık sık değişir. Çizimler gezegenlerin görünümünden esinlenen illüstrasyonlardır, fotoğraf değildir.</p>
+  </footer>
+</div>
+
+<button class="to-top" id="toTop" type="button" aria-label="Sayfanın başına çık" title="Yukarı çık" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+/* ---------- SVG çizim yardımcıları ---------- */
+function stops(a){ return a.map(function(s){ return '<stop offset="'+s[0]+'" stop-color="'+s[1]+'"/>'; }).join(''); }
+
+function shell(id, o, inner){
+  var w = o.w || 320, cx = o.cx || 160, cy = 160, r = o.r || 120;
+  return '<svg viewBox="0 0 '+w+' 320" role="img" aria-label="'+o.label+'" xmlns="http://www.w3.org/2000/svg">'
+  + '<defs>'
+  + '<clipPath id="cp-'+id+'"><circle cx="'+cx+'" cy="'+cy+'" r="'+r+'"/></clipPath>'
+  + '<radialGradient id="bg-'+id+'" cx="35%" cy="32%" r="85%">'+stops(o.base)+'</radialGradient>'
+  + '<radialGradient id="sh-'+id+'" cx="34%" cy="30%" r="82%"><stop offset=".48" stop-color="#000" stop-opacity="0"/><stop offset=".82" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity=".94"/></radialGradient>'
+  + '<filter id="bl-'+id+'" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="'+(o.blur||5)+'"/></filter>'
+  + '<filter id="sb-'+id+'" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.6"/></filter>'
+  + '<filter id="nz-'+id+'" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="'+(o.nf||'0.02')+'" numOctaves="4" seed="'+(o.seed||3)+'"/><feColorMatrix type="saturate" values="0"/></filter>'
+  + (o.defs || '')
+  + '</defs>'
+  + '<g clip-path="url(#cp-'+id+')">'
+  + '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="url(#bg-'+id+')"/>'
+  + inner
+  + '<rect x="0" y="0" width="'+w+'" height="320" filter="url(#nz-'+id+')" opacity="'+(o.nop||.3)+'" style="mix-blend-mode:overlay"/>'
+  + '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="url(#sh-'+id+')"/>'
+  + '</g>'
+  + '<circle cx="'+cx+'" cy="'+cy+'" r="'+(r+1)+'" fill="none" stroke="'+(o.glow||'#fff')+'" stroke-opacity="'+(o.gop||.18)+'" stroke-width="2.5" filter="url(#sb-'+id+')"/>'
+  + (o.after || '')
+  + '</svg>';
+}
+
+function blobs(id, list){
+  return '<g filter="url(#bl-'+id+')">' + list.map(function(b){
+    return '<ellipse cx="'+b[0]+'" cy="'+b[1]+'" rx="'+b[2]+'" ry="'+b[3]+'" fill="'+b[4]+'" opacity="'+b[5]+'"'+(b[6]?' transform="rotate('+b[6]+' '+b[0]+' '+b[1]+')"':'')+'/>';
+  }).join('') + '</g>';
+}
+
+/* ---------- Gezegen çizimleri ---------- */
+function art_mercury(){
+  var craters = [[110,100,17],[190,80,11],[222,150,22],[138,176,13],[96,204,9],[178,214,18],[250,206,8],[70,152,10],[160,128,8],[206,238,10],[126,60,8]];
+  var c = craters.map(function(k){
+    return '<circle cx="'+k[0]+'" cy="'+k[1]+'" r="'+k[2]+'" fill="#000" fill-opacity=".2"/>'
+         + '<circle cx="'+(k[0]-1.5)+'" cy="'+(k[1]-1.5)+'" r="'+k[2]+'" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="1.4"/>';
+  }).join('');
+  var rays = '<path d="M222 150 L300 120 M222 150 L290 190 M222 150 L180 90" stroke="#fff" stroke-opacity=".08" stroke-width="3" filter="url(#sb-mercury)"/>';
+  return shell('mercury', {label:'Merkür çizimi', base:[[0,'#cfc8bf'],[.55,'#8f8880'],[1,'#3c3834']], nf:'0.05', nop:.5, seed:7, glow:'#cfc8bf', gop:.12}, rays + c);
+}
+function art_venus(){
+  var b = blobs('venus', [[150,100,160,16,'#fbecc0',.6,-8],[170,140,170,18,'#c28a45',.5,-6],[140,180,170,16,'#f6dca0',.55,-10],[180,215,160,14,'#b87a3c',.5,-7],[160,250,150,12,'#f2d896',.5,-5],[170,70,140,12,'#e2b66e',.45,-9]]);
+  return shell('venus', {label:'Venüs çizimi', base:[[0,'#f6e3ae'],[.6,'#d9a85a'],[1,'#7d4f24']], nf:'0.008 0.03', nop:.35, seed:11, blur:7, glow:'#f6d98f', gop:.35}, b);
+}
+function art_earth(){
+  var land = '<g fill="#4f9d4a">'
+    + '<path d="M95 90 C110 70 150 68 165 85 C172 98 160 112 148 118 C150 132 138 142 122 138 C112 150 98 140 100 126 C84 118 82 100 95 90Z"/>'
+    + '<path d="M138 160 C152 152 168 162 170 178 C172 200 160 222 148 238 C140 240 136 226 138 210 C130 192 126 172 138 160Z"/>'
+    + '</g><g fill="#b7a35a">'
+    + '<path d="M205 110 C222 100 244 110 248 128 C252 150 238 170 228 188 C218 196 206 184 204 166 C196 150 190 128 205 110Z"/>'
+    + '</g><g fill="#6aa854"><path d="M200 78 C216 70 240 76 244 90 C232 96 214 98 200 92Z"/></g>';
+  var ice = '<ellipse cx="160" cy="46" rx="60" ry="14" fill="#f4f8ff" opacity=".9" filter="url(#sb-earth)"/><ellipse cx="160" cy="288" rx="70" ry="14" fill="#f4f8ff" opacity=".9" filter="url(#sb-earth)"/>';
+  var clouds = blobs('earth', [[120,120,40,8,'#fff',.6,-12],[200,200,50,9,'#fff',.55,10],[90,200,34,7,'#fff',.5,-6],[210,95,36,7,'#fff',.55,8],[160,160,46,6,'#fff',.4,-4],[140,250,44,8,'#fff',.5,6]]);
+  return shell('earth', {label:'Dünya çizimi', base:[[0,'#5aa0e6'],[.6,'#1f62b5'],[1,'#0a2d66']], nf:'0.03', nop:.18, seed:5, blur:4, glow:'#7cc0ff', gop:.55}, land + ice + clouds);
+}
+function art_mars(){
+  var patches = blobs('mars', [[130,150,44,20,'#5b2614',.5,-10],[215,120,30,16,'#6b2f1a',.45,12],[170,205,50,16,'#6b2f1a',.4,-6],[100,215,26,14,'#8c4326',.4,0],[225,215,22,12,'#5b2614',.4,0]]);
+  var valles = '<path d="M110 168 C140 160 170 172 205 166" fill="none" stroke="#3d170b" stroke-opacity=".55" stroke-width="4" stroke-linecap="round" filter="url(#sb-mars)"/>';
+  var cap = '<ellipse cx="160" cy="48" rx="42" ry="13" fill="#fff" opacity=".9" filter="url(#sb-mars)"/>';
+  return shell('mars', {label:'Mars çizimi', base:[[0,'#e8956a'],[.6,'#b9532c'],[1,'#4e1f10']], nf:'0.04', nop:.4, seed:9, blur:5, glow:'#ff9a6a', gop:.22}, patches + valles + cap);
+}
+function art_jupiter(){
+  var bands = [[48,22,'#b88a5e',.7],[70,14,'#f1e2c4',.8],[84,20,'#a8683f',.8],[104,12,'#efe0c0',.9],[116,22,'#c07a4a',.7],[138,10,'#f3e6c8',.9],[148,18,'#9b5e3a',.75],[166,14,'#ecdcb8',.9],[180,22,'#b98558',.7],[202,12,'#f0e1c0',.8],[214,22,'#a9714b',.7],[236,26,'#cfae86',.6]];
+  var b = '<g filter="url(#bl-jupiter)">' + bands.map(function(k){ return '<rect x="20" y="'+k[0]+'" width="280" height="'+k[1]+'" fill="'+k[2]+'" opacity="'+k[3]+'"/>'; }).join('') + '</g>';
+  var spot = '<g filter="url(#sb-jupiter)"><ellipse cx="206" cy="184" rx="27" ry="15" fill="#e3805a"/><ellipse cx="206" cy="184" rx="18" ry="9" fill="#a93a24"/></g>';
+  return shell('jupiter', {label:'Jüpiter çizimi', base:[[0,'#ecd9b6'],[.7,'#c9a27a'],[1,'#6b4630']], nf:'0.006 0.09', nop:.45, seed:2, blur:3, glow:'#f2dcb8', gop:.22}, b + spot);
+}
+function art_saturn(){
+  var cx = 240, r = 78;
+  var rings = [[112,29,'#7d6e56',9,.55],[138,36,'#dcc392',24,.95],[154,40,'#000000',4,.9],[172,45,'#c8ae7c',20,.9],[190,49,'#8a7a5e',3,.6]];
+  function ring(){ return rings.map(function(k){ return '<ellipse cx="'+cx+'" cy="160" rx="'+k[0]+'" ry="'+k[1]+'" fill="none" stroke="'+k[2]+'" stroke-width="'+k[3]+'" stroke-opacity="'+k[4]+'"/>'; }).join(''); }
+  var bands = [[96,14,'#d9bf8a',.7],[112,10,'#f1dfb2',.8],[124,16,'#b8975f',.6],[142,12,'#f3e3b8',.8],[156,18,'#c9a76e',.6],[176,12,'#efdcae',.7],[190,16,'#a98a58',.55],[208,12,'#e4cc98',.6]];
+  var b = '<g filter="url(#bl-saturn)">' + bands.map(function(k){ return '<rect x="140" y="'+k[0]+'" width="200" height="'+k[1]+'" fill="'+k[2]+'" opacity="'+k[3]+'"/>'; }).join('') + '</g>';
+  var defs = '<clipPath id="front-saturn"><rect x="0" y="160" width="480" height="160"/></clipPath>';
+  var back = '<g transform="rotate(-16 '+cx+' 160)">'+ring()+'</g>';
+  var front = '<g transform="rotate(-16 '+cx+' 160)"><g clip-path="url(#front-saturn)">'+ring()+'</g></g>';
+  var planet = shell('saturn', {label:'Satürn çizimi', w:480, cx:cx, r:r, base:[[0,'#f4e4bc'],[.6,'#d2b27a'],[1,'#6f5532']], nf:'0.006 0.08', nop:.35, seed:4, blur:2.5, glow:'#f4dfae', gop:.2, defs:defs, after:front}, b);
+  return planet.replace('<g clip-path="url(#cp-saturn)">', back + '<g clip-path="url(#cp-saturn)">');
+}
+function art_uranus(){
+  var b = blobs('uranus', [[160,70,90,14,'#effcfd',.55],[160,150,120,10,'#b8e7ec',.35,-4],[160,215,110,12,'#6bb6c0',.35,-4]]);
+  function ring(){ return '<ellipse cx="160" cy="160" rx="30" ry="138" fill="none" stroke="#c9eef2" stroke-opacity=".55" stroke-width="2"/><ellipse cx="160" cy="160" rx="37" ry="148" fill="none" stroke="#9fd2d9" stroke-opacity=".4" stroke-width="1.4"/><ellipse cx="160" cy="160" rx="44" ry="156" fill="none" stroke="#c9eef2" stroke-opacity=".28" stroke-width="1"/>'; }
+  var defs = '<clipPath id="front-uranus"><rect x="160" y="0" width="160" height="320"/></clipPath>';
+  var front = '<g transform="rotate(8 160 160)"><g clip-path="url(#front-uranus)">'+ring()+'</g></g>';
+  var planet = shell('uranus', {label:'Uranüs çizimi', r:96, base:[[0,'#dff8f9'],[.6,'#8fd3d9'],[1,'#2f7a88']], nf:'0.01', nop:.15, seed:6, blur:6, glow:'#bff3f6', gop:.4, defs:defs, after:front}, b);
+  return planet.replace('<g clip-path="url(#cp-uranus)">', '<g transform="rotate(8 160 160)">'+ring()+'</g><g clip-path="url(#cp-uranus)">');
+}
+function art_neptune(){
+  var spot = '<ellipse cx="118" cy="158" rx="26" ry="14" fill="#10277f" opacity=".85" filter="url(#bl-neptune)"/>';
+  var wisps = '<g filter="url(#sb-neptune)" fill="none" stroke="#e9f0ff" stroke-linecap="round" opacity=".75"><path d="M150 168 C170 162 190 166 205 172" stroke-width="3"/><path d="M200 112 C220 110 240 118 250 128" stroke-width="2.5"/><path d="M70 214 C96 208 124 210 150 218" stroke-width="2.5"/></g>';
+  var b = blobs('neptune', [[160,92,130,10,'#7aa4ff',.5,-6],[160,200,130,12,'#16318f',.5,-6],[160,250,100,10,'#6c95ff',.4,-4]]);
+  return shell('neptune', {label:'Neptün çizimi', base:[[0,'#6c9bff'],[.55,'#2f56d8'],[1,'#0b1a5c']], nf:'0.008 0.07', nop:.3, seed:8, blur:6, glow:'#7aa6ff', gop:.5}, b + spot + wisps);
+}
+
+/* ---------- Veri ---------- */
+var PLANETS = [
+  { id:'merkur', n:'Merkür', c:'#cfc8bf', art:art_mercury, mini:['#d8d1c8','#8f8880','#3c3834',.0351], au:0.39,
+    tag:'Güneş\'e en yakın ve en küçük gezegen.',
+    body:['Merkür, Güneş\'in çok yakınında dolandığı için yılı yalnızca 88 Dünya günü sürer. Buna karşılık kendi ekseni etrafındaki dönüşü çok yavaştır; bir Merkür gününde, yani Güneş\'in gökyüzünde aynı noktaya dönmesi için geçen sürede, Dünya\'da yaklaşık 176 gün geçer.','Atmosferi neredeyse yok denecek kadar incedir. Isıyı tutacak bir hava tabakası olmadığından gündüz yüzeyi 430 °C\'ye çıkar, gece −180 °C\'ye kadar iner. Yüzeyi, Ay\'a benzer şekilde çarpma kraterleriyle kaplıdır.'],
+    fact:'Merkür\'ün çapı Dünya\'nın çapının yaklaşık yüzde 38\'i kadardır. Çapı Ganymede ve Titan uydularından küçük olsa da kütlesi onlarınkinin yaklaşık iki katıdır.',
+    d:[['Çap','4.879 km'],['Güneş\'e uzaklık','57,9 milyon km','0,39 AU'],['Yörünge süresi','88 gün'],['Kendi ekseninde dönüş','58,6 gün'],['Yüzey sıcaklığı','−180 ile 430 °C'],['Uydu sayısı','0'],['Yerçekimi','3,7 m/s²','Dünya\'nın %38\'i']] },
+  { id:'venus', n:'Venüs', c:'#f2cf86', art:art_venus, mini:['#f6e3ae','#d9a85a','#7d4f24',.0866], au:0.72,
+    tag:'Güneş sisteminin en sıcak gezegeni.',
+    body:['Venüs, boyut ve kütle bakımından Dünya\'ya en çok benzeyen gezegendir ancak yaşanabilir olmaktan çok uzaktır. Atmosferi büyük oranda karbondioksitten oluşur ve yüzeydeki basınç Dünya\'dakinin yaklaşık 90 katıdır.','Yoğun bulutlar ve güçlü sera etkisi nedeniyle yüzey sıcaklığı yaklaşık 464 °C\'de sabit kalır; bu, Merkür\'den bile sıcaktır. Bulutlar sülfürik asit damlacıklarından oluşur.'],
+    fact:'Venüs diğer gezegenlerin çoğunun tersi yönde, doğudan batıya doğru döner. Güneş orada batıdan doğar ve bir Venüs günü, Venüs yılından (224,7 gün) daha uzundur.',
+    d:[['Çap','12.104 km'],['Güneş\'e uzaklık','108,2 milyon km','0,72 AU'],['Yörünge süresi','224,7 gün'],['Kendi ekseninde dönüş','243 gün','ters yönde'],['Yüzey sıcaklığı','yaklaşık 464 °C'],['Uydu sayısı','0'],['Yerçekimi','8,9 m/s²','Dünya\'nın %90\'ı']] },
+  { id:'dunya', n:'Dünya', c:'#6fb3ff', art:art_earth, mini:['#7ab8f5','#1f62b5','#0a2d66',.0911], au:1.0,
+    tag:'Bildiğimiz kadarıyla yaşamın var olduğu tek gezegen.',
+    body:['Dünya\'nın yüzeyinin yaklaşık yüzde 71\'i sıvı suyla kaplıdır. Güneş\'e olan uzaklığı, suyun yüzeyde sıvı halde kalabilmesine imkân veren sıcaklık aralığına denk gelir.','Azot ve oksijenden oluşan atmosferi Güneş\'in zararlı ışınlarının bir kısmını süzer, manyetik alanı ise güneş rüzgârının yüklü parçacıklarını saptırır. Eksen eğikliği (yaklaşık 23,4°) mevsimleri oluşturur.'],
+    fact:'Dünya, Güneş sisteminin en yoğun gezegenidir. Ortalama yoğunluğu yaklaşık 5,51 g/cm³\'tür.',
+    d:[['Çap','12.742 km'],['Güneş\'e uzaklık','149,6 milyon km','1 AU'],['Yörünge süresi','365,25 gün'],['Kendi ekseninde dönüş','23 sa 56 dk'],['Ortalama sıcaklık','yaklaşık 15 °C'],['Uydu sayısı','1','Ay'],['Yerçekimi','9,81 m/s²']] },
+  { id:'mars', n:'Mars', c:'#e8845a', art:art_mars, mini:['#e8956a','#b9532c','#4e1f10',.0485], au:1.52,
+    tag:'Kızıl Gezegen.',
+    body:['Mars\'ın yüzeyindeki toprak demir oksit bakımından zengindir; bu yüzden gezegen kızıl görünür. İnce atmosferi çoğunlukla karbondioksittir ve yüzey basıncı Dünya\'dakinin yüzde 1\'inden azdır.','Güneş sisteminin en yüksek volkanı Olympus Mons ile yaklaşık 4.000 km uzunluğundaki Valles Marineris kanyon sistemi Mars\'tadır. Kutuplarda su ve karbondioksit buzu bulunur, geçmişte yüzeyinde sıvı su aktığına dair güçlü kanıtlar vardır.'],
+    fact:'Olympus Mons yaklaşık 22 km yüksekliğindedir. Bu, Everest Dağı\'nın yaklaşık iki buçuk katıdır.',
+    d:[['Çap','6.779 km'],['Güneş\'e uzaklık','227,9 milyon km','1,52 AU'],['Yörünge süresi','687 gün'],['Kendi ekseninde dönüş','24 sa 37 dk'],['Ortalama sıcaklık','yaklaşık −65 °C'],['Uydu sayısı','2','Fobos, Deimos'],['Yerçekimi','3,7 m/s²','Dünya\'nın %38\'i']] },
+  { id:'jupiter', n:'Jüpiter', c:'#e2b98a', art:art_jupiter, mini:['#ecd9b6','#c9a27a','#6b4630',1], au:5.2,
+    tag:'Güneş sisteminin dev gezegeni.',
+    body:['Jüpiter diğer tüm gezegenlerin toplamından yaklaşık 2,5 kat daha kütlelidir. Büyük oranda hidrojen ve helyumdan oluşur ve kayalık bir yüzeyi yoktur; derinlere indikçe gaz giderek sıvıya dönüşür.','Gözlenen en ünlü özelliği Büyük Kırmızı Leke\'dir: yüzyıllardır süren dev bir fırtına. Leke son yüzyıl içinde belirgin biçimde küçülmüştür ama hâlâ Dünya\'nın çapına yakın bir genişliğe sahiptir.'],
+    fact:'Jüpiter\'in içine yaklaşık 1.300 Dünya sığabilir. Yine de 9 saat 56 dakikada bir kez döner; bu, Güneş sistemindeki en hızlı dönüştür.',
+    d:[['Çap','139.820 km'],['Güneş\'e uzaklık','778,5 milyon km','5,2 AU'],['Yörünge süresi','11,86 yıl'],['Kendi ekseninde dönüş','9 sa 56 dk'],['Bulut tepesi sıcaklığı','yaklaşık −110 °C'],['Uydu sayısı','90\'dan fazla','4 büyük: Io, Europa, Ganymede, Callisto'],['Yerçekimi','24,8 m/s²','Dünya\'nın 2,5 katı']] },
+  { id:'saturn', n:'Satürn', c:'#e6cc94', art:art_saturn, mini:['#f4e4bc','#d2b27a','#6f5532',.833], au:9.58, cls:'sat',
+    tag:'Halkalarıyla tanınan altıncı gezegen.',
+    body:['Satürn\'ün halkaları çoğunlukla su buzu parçalarından oluşur. Parçaların boyu toz tanesinden küçük bir evin büyüklüğüne kadar değişir. Halkalar on binlerce km genişliğinde olmasına rağmen yalnızca birkaç on metre kalınlığındadır.','Gezegen neredeyse tamamen hidrojen ve helyumdandır. Ortalama yoğunluğu suyunkinden düşüktür; yeterince büyük bir okyanus bulunsaydı Satürn üzerinde yüzerdi.'],
+    fact:'Satürn\'ün en büyük uydusu Titan, yoğun bir atmosfere ve yüzeyinde sıvı metan ve etan göllerine sahiptir.',
+    d:[['Çap','116.460 km'],['Güneş\'e uzaklık','1,43 milyar km','9,58 AU'],['Yörünge süresi','29,4 yıl'],['Kendi ekseninde dönüş','10 sa 33 dk'],['Bulut tepesi sıcaklığı','yaklaşık −140 °C'],['Uydu sayısı','270\'ten fazla','en büyüğü Titan'],['Yerçekimi','10,4 m/s²']] },
+  { id:'uranus', n:'Uranüs', c:'#a9e7ec', art:art_uranus, mini:['#dff8f9','#8fd3d9','#2f7a88',.3628], au:19.2,
+    tag:'Yanlamasına yuvarlanan buz devi.',
+    body:['Uranüs\'ün dönme ekseni yörünge düzlemine göre yaklaşık 98° eğiktir; gezegen adeta yan yatmış halde Güneş\'in etrafında döner. Bu yüzden kutuplar uzun yıllar boyunca sırayla Güneş\'e bakar ve her kutup yaklaşık 42 yıl gündüz, 42 yıl gece yaşar.','Atmosferindeki metan, kırmızı ışığı soğurduğu için gezegene soluk mavi-yeşil bir renk verir. İçinde su, amonyak ve metan buzları bulunduğundan "buz devi" olarak sınıflandırılır.'],
+    fact:'Uranüs, bir teleskopla keşfedilen ilk gezegendir; William Herschel 1781\'de onu buldu.',
+    d:[['Çap','50.724 km'],['Güneş\'e uzaklık','2,87 milyar km','19,2 AU'],['Yörünge süresi','84 yıl'],['Kendi ekseninde dönüş','17 sa 14 dk','ters yönde'],['Bulut tepesi sıcaklığı','yaklaşık −195 °C'],['Uydu sayısı','29'],['Yerçekimi','8,7 m/s²']] },
+  { id:'neptun', n:'Neptün', c:'#6f9bff', art:art_neptune, mini:['#6c9bff','#2f56d8','#0b1a5c',.3522], au:30.07,
+    tag:'Güneş\'ten en uzak, rüzgârı en şiddetli gezegen.',
+    body:['Neptün çıplak gözle görülemez. Varlığı, Uranüs\'ün yörüngesindeki sapmalardan hesaplanarak 1846\'de matematiksel olarak öngörüldü ve aynı yıl teleskopla bulundu.','Atmosferinde rüzgârlar saatte 2.000 km\'ye yaklaşan hızlara ulaşır, bu Güneş sisteminin en hızlı rüzgârlarıdır. Güneş\'ten bu kadar uzakta olmasına rağmen iç ısı kaynağı sayesinde aldığından fazla enerji yayar.'],
+    fact:'Neptün Güneş\'in etrafındaki ilk turunu keşfinden bu yana 2011\'de tamamladı. Bir Neptün yılı yaklaşık 165 Dünya yılı sürer.',
+    d:[['Çap','49.244 km'],['Güneş\'e uzaklık','4,50 milyar km','30,1 AU'],['Yörünge süresi','164,8 yıl'],['Kendi ekseninde dönüş','16 sa 6 dk'],['Bulut tepesi sıcaklığı','yaklaşık −200 °C'],['Uydu sayısı','16','en büyüğü Triton'],['Yerçekimi','11,2 m/s²']] }
+];
+
+/* ---------- Sayfayı kur ---------- */
+(function(){
+  var nav = document.getElementById('nav');
+  var strip = document.getElementById('strip');
+  var main = document.getElementById('main');
+  var MAX_AU = 30.07;
+
+  PLANETS.forEach(function(p, i){
+    var a = document.createElement('a');
+    a.href = '#' + p.id; a.textContent = p.n; a.style.setProperty('--c', p.c);
+    nav.appendChild(a);
+
+    var m = document.createElement('a');
+    m.href = '#' + p.id; m.className = 'mini' + (p.cls ? ' ' + p.cls : '');
+    m.title = p.n; m.setAttribute('aria-label', p.n);
+    m.style.setProperty('--c1', p.mini[0]); m.style.setProperty('--c2', p.mini[1]);
+    m.style.setProperty('--c3', p.mini[2]); m.style.setProperty('--r', p.mini[3]);
+    strip.appendChild(m);
+
+    var s = document.createElement('section');
+    s.className = 'planet'; s.id = p.id; s.style.setProperty('--c', p.c);
+    var dl = p.d.map(function(r){
+      return '<div><dt>'+r[0]+'</dt><dd>'+r[1]+(r[2] ? ' <small>· '+r[2]+'</small>' : '')+'</dd></div>';
+    }).join('');
+    var pct = Math.max(1, (p.au / MAX_AU) * 100).toFixed(1);
+    s.innerHTML =
+      '<div class="art">' + p.art() + '</div>' +
+      '<div class="info">' +
+        '<p class="idx">Güneş\'ten '+(i+1)+'. gezegen</p>' +
+        '<h2 class="name">'+p.n+'</h2>' +
+        '<p class="tag">'+p.tag+'</p>' +
+        p.body.map(function(t){ return '<p class="body">'+t+'</p>'; }).join('') +
+        '<div class="fact"><b>Biliyor muydunuz?</b>'+p.fact+'</div>' +
+        '<dl class="data">'+dl+'</dl>' +
+        '<div class="dist"><div class="lab"><span>Güneş\'e uzaklık (Neptün = tam şerit)</span><span>'+String(p.au).replace('.', ',')+' AU</span></div><div class="track"><div class="fill" style="width:'+pct+'%"></div></div></div>' +
+      '</div>';
+    main.appendChild(s);
+  });
+
+  /* Yıldız zemini (statik) */
+  var cv = document.getElementById('stars');
+  function paint(){
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = window.innerWidth, h = window.innerHeight;
+    cv.width = w * dpr; cv.height = h * dpr;
+    var g = cv.getContext('2d'); g.scale(dpr, dpr); g.clearRect(0, 0, w, h);
+    var n = Math.round(w * h / 5200), seed = 12345;
+    function rnd(){ seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
+    for (var k = 0; k < n; k++){
+      var x = rnd() * w, y = rnd() * h, r = rnd() < .06 ? 1.3 : rnd() * .8 + .25, o = rnd() * .6 + .25;
+      g.fillStyle = 'rgba(' + (rnd() < .2 ? '190,205,255' : '255,255,255') + ',' + o.toFixed(2) + ')';
+      g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill();
+    }
+  }
+  paint();
+  var t; window.addEventListener('resize', function(){ clearTimeout(t); t = setTimeout(paint, 150); });
+
+  /* Yukarı çık düğmesi */
+  var up = document.getElementById('toTop');
+  function y(){ return window.pageYOffset || document.documentElement.scrollTop || 0; }
+  function toggleUp(){ up.hidden = y() < 300; }
+  window.addEventListener('scroll', toggleUp, { passive: true });
+  toggleUp();
+  up.addEventListener('click', function(){
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  });
+})();
+</script>
